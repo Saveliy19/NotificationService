@@ -11,10 +11,10 @@ class EmailSender:
         self.username = USERNAME
         self.password = PASSWORD
 
-    def send_email(self, receiver_email, subject, body):
+    def send_email(self, receiver_emails, subject, body):
         message = MIMEMultipart()
         message['From'] = self.username
-        message['To'] = receiver_email
+        message['To'] = ", ".join(receiver_emails)
         message['Subject'] = subject
         message.attach(MIMEText(body, 'plain'))
 
@@ -23,10 +23,11 @@ class EmailSender:
             server.starttls()
             server.login(self.username, self.password)
             text = message.as_string()
-            server.sendmail(self.username, receiver_email, text)  # Отправляем письмо нескольким получателям
-            print('Письмо успешно отправлено!')
-        except Exception as e:
-            print(f'Ошибка при отправке письма: {e}')
-        finally:
+            # Отправляем письмо каждому получателю в списке
+            for receiver_email in receiver_emails:
+                server.sendmail(self.username, receiver_email, text)
             server.quit()
+        except:
+            return False
+        return True
 
